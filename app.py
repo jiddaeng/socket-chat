@@ -5,9 +5,9 @@ import os
 import dotenv
 
 def create_app() :
-    dotenv.load_dotenv()
+    
     app = Flask(__name__)
-
+    dotenv.load_dotenv()
     #환경세팅 - o
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_PUBLIC_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

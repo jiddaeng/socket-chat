@@ -2,8 +2,10 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
 import os
+import dotenv
 
 def create_app() :
+    dotenv.load_dotenv()
     app = Flask(__name__)
 
     #환경세팅 - o

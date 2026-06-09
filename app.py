@@ -4,35 +4,38 @@ from extensions import db, jwt, socketio
 import os
 import dotenv
 
-def create_app() :
-    
+
+def create_app():
+
     app = Flask(__name__)
     dotenv.load_dotenv()
-    #환경세팅 - o
+    # 환경세팅 - o
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_PUBLIC_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
-    #extension연결 - o
+    # extension연결 - o
     db.init_app(app)
     jwt.init_app(app)
-    socketio.init_app(app, cors_allowed_origins='*')
+    socketio.init_app(app, cors_allowed_origins="*")
 
-    #route연결 - x
+    # route연결 - x
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-    #db초기화 - o
+    # db초기화 - o
     with app.app_context():
         db.create_all()
+        print("db 초기화")
 
-    #health check - o
+    # health check - o
     @app.route("/")
     def home():
         return {"status": "alive"}
-    
+
     return app
 
-if __name__ == "__main__" :
+
+if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host="0.0.0.0", port=port)

@@ -41,4 +41,6 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
+    print("PORT =", port)
     socketio.run(app, host="0.0.0.0", port=port)
+    print("여기 찍히면 안 됨")

@@ -5,12 +5,15 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
 
+
 def create_app():
 
     app = Flask(__name__)
     load_dotenv()
     # 환경세팅 - o
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_PUBLIC_URL")
+    db_url = os.getenv("DATABASE_PUBLIC_URL")
+    print("DB URL repr =", repr(db_url))
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 

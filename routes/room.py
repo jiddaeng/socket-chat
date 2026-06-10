@@ -19,3 +19,9 @@ def madeRoom() :
     room = Room(roomname=roomname)
     db.session.add(room)
     db.session.commit()
+    
+    return jsonify({
+        "message": "방 생성 완료",
+        "room_id": room.room_id,
+        "roomname": room.roomname
+    }), 201

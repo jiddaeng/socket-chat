@@ -5,9 +5,10 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
 
+from routes.auth import auth_bp
+
 
 def create_app():
-
     app = Flask(__name__)
     load_dotenv()
     # 환경세팅 - o
@@ -22,7 +23,8 @@ def create_app():
     jwt.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
 
-    # route연결 - x
+    # route연결 - o
+    app.register_blueprint(auth_bp)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # db초기화 - o

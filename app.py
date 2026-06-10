@@ -1,16 +1,9 @@
-import eventlet
 import os
 from dotenv import load_dotenv
 
 from flask import Flask
 from flask_cors import CORS
 from extensions import db, jwt, socketio
-
-eventlet.monkey_patch()
-
-
-
-
 
 def create_app():
 

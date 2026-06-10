@@ -6,6 +6,7 @@ from flask_cors import CORS
 from extensions import db, jwt, socketio
 
 from routes.auth import auth_bp
+from routes.room import room_bp
 
 
 def create_app():
@@ -25,6 +26,7 @@ def create_app():
 
     # route연결 - o
     app.register_blueprint(auth_bp)
+    app.register_blueprint(room_bp)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # db초기화 - o

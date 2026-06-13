@@ -6,7 +6,7 @@ from flask_cors import CORS
 from extensions import db, jwt, socketio
 
 from routes.auth import auth_bp
-from routes.room import room_bp
+from sockets import connection, room
 
 
 def create_app():
@@ -26,7 +26,6 @@ def create_app():
 
     # route연결 - o
     app.register_blueprint(auth_bp)
-    app.register_blueprint(room_bp)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # db초기화 - o
@@ -46,5 +45,6 @@ if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
     print("PORT =", port)
+    print("서버 시작")
     socketio.run(app, host="0.0.0.0", port=port)
     print("여기 찍히면 안 됨")

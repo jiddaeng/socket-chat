@@ -4,7 +4,7 @@ from flask_jwt_extended import decode_token
 from flask_socketio import emit, leave_room
 from state import sidToUserid, useridToRoomid, rooms
 from extensions import db
-from models import Room
+from models import Room, User
 
 print("connection.py import됨")
 
@@ -36,6 +36,8 @@ def handle_disconnect() :
     if userid is None :
         emit("disconnect_error", "disconnect: userid is None")
         return
+    db.session.delete(User.query.get(userid))
+    db.session.commit()
     roomid = useridToRoomid.pop(userid, None) # 없을 수도 있음
     if roomid is not None :
         leave_room(roomid)

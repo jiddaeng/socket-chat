@@ -1,23 +1,37 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
 const API_URL = "http://localhost:5000";
 
+interface ChatMessage {
+    message_id: number;
+    message: string;
+    userid: number;
+    username: string;
+}
+
 export default function App() {
     const socketRef = useRef<Socket | null>(null);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
 
     const [username, setUsername] = useState("");
     const [token, setToken] = useState("");
 
     const [roomname, setRoomname] = useState("");
-
     const [message, setMessage] = useState("");
 
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [logs, setLogs] = useState<string[]>([]);
 
     function addLog(msg: string) {
         setLogs(prev => [...prev, msg]);
     }
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({
+            behavior: "smooth",
+        });
+    }, [messages]);
 
     async function login() {
         try {
@@ -41,7 +55,7 @@ export default function App() {
             setToken(data.accessToken);
 
             addLog(
-                `로그인 성공: ${data.username}`
+                `로그인 성공 (${data.username})`
             );
         } catch (err) {
             addLog(String(err));
@@ -63,20 +77,30 @@ export default function App() {
         socketRef.current = socket;
 
         socket.on("connect", () => {
-            addLog(`소켓 연결 성공: ${socket.id}`);
+            addLog(
+                `소켓 연결 성공 (${socket.id})`
+            );
         });
 
         socket.on("disconnect", () => {
             addLog("소켓 연결 종료");
         });
 
-        socket.on("connect_error", err => {
-            addLog(`connect_error: ${err.message}`);
-        });
+        socket.on(
+            "message_success",
+            (data: ChatMessage) => {
+                setMessages(prev => [
+                    ...prev,
+                    data,
+                ]);
+            }
+        );
 
         socket.onAny((event, data) => {
             addLog(
-                `[${event}] ${JSON.stringify(data)}`
+                `[${event}] ${JSON.stringify(
+                    data
+                )}`
             );
         });
     }
@@ -100,6 +124,8 @@ export default function App() {
     }
 
     function sendMessage() {
+        if (!message.trim()) return;
+
         socketRef.current?.emit(
             "send_message",
             {
@@ -113,103 +139,278 @@ export default function App() {
     return (
         <div
             style={{
-                padding: 20,
-                maxWidth: 800,
-                margin: "0 auto",
-                fontFamily: "sans-serif",
+                height: "100vh",
+                display: "flex",
+                background: "#f5f6f8",
+                fontFamily:
+                    "Pretendard, sans-serif",
             }}
         >
-            <h1>Socket Chat Test</h1>
-
-            <hr />
-
-            <h2>1. 로그인</h2>
-
-            <input
-                value={username}
-                onChange={e =>
-                    setUsername(e.target.value)
-                }
-                placeholder="username"
-            />
-
-            <button onClick={login}>
-                로그인
-            </button>
-
-            <div>
-                token:
-                <br />
-                <textarea
-                    value={token}
-                    readOnly
-                    rows={5}
-                    style={{ width: "100%" }}
-                />
-            </div>
-
-            <hr />
-
-            <h2>2. 소켓 연결</h2>
-
-            <button onClick={connectSocket}>
-                Connect
-            </button>
-
-            <hr />
-
-            <h2>3. 방 생성 / 참가</h2>
-
-            <input
-                value={roomname}
-                onChange={e =>
-                    setRoomname(e.target.value)
-                }
-                placeholder="roomname"
-            />
-
-            <button onClick={createRoom}>
-                Create Room
-            </button>
-
-            <button onClick={joinRoom}>
-                Join Room
-            </button>
-
-            <hr />
-
-            <h2>4. 메시지 전송</h2>
-
-            <input
-                value={message}
-                onChange={e =>
-                    setMessage(e.target.value)
-                }
-                placeholder="message"
-            />
-
-            <button onClick={sendMessage}>
-                Send
-            </button>
-
-            <hr />
-
-            <h2>로그</h2>
-
+            {/* 사이드바 */}
             <div
                 style={{
-                    border: "1px solid gray",
-                    padding: 10,
-                    height: 400,
-                    overflow: "auto",
-                    whiteSpace: "pre-wrap",
+                    width: 280,
+                    borderRight:
+                        "1px solid #ddd",
+                    background: "white",
+                    padding: 20,
+                    overflowY: "auto",
                 }}
             >
-                {logs.map((log, idx) => (
-                    <div key={idx}>
-                        {log}
-                    </div>
-                ))}
+                <h2>Socket Chat</h2>
+
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection:
+                            "column",
+                        gap: 8,
+                    }}
+                >
+                    <input
+                        value={username}
+                        onChange={e =>
+                            setUsername(
+                                e.target.value
+                            )
+                        }
+                        placeholder="username"
+                    />
+
+                    <button
+                        onClick={login}
+                    >
+                        로그인
+                    </button>
+
+                    <button
+                        onClick={
+                            connectSocket
+                        }
+                    >
+                        소켓 연결
+                    </button>
+                </div>
+
+                <hr />
+
+                <input
+                    value={roomname}
+                    onChange={e =>
+                        setRoomname(
+                            e.target.value
+                        )
+                    }
+                    placeholder="roomname"
+                />
+
+                <div
+                    style={{
+                        display: "flex",
+                        gap: 8,
+                        marginTop: 8,
+                    }}
+                >
+                    <button
+                        onClick={
+                            createRoom
+                        }
+                    >
+                        생성
+                    </button>
+
+                    <button
+                        onClick={joinRoom}
+                    >
+                        참가
+                    </button>
+                </div>
+
+                <hr />
+
+                <h3>로그</h3>
+
+                <div
+                    style={{
+                        fontSize: 12,
+                        whiteSpace:
+                            "pre-wrap",
+                        display: "flex",
+                        flexDirection:
+                            "column",
+                        gap: 4,
+                    }}
+                >
+                    {logs.map(
+                        (log, idx) => (
+                            <div
+                                key={idx}
+                            >
+                                {log}
+                            </div>
+                        )
+                    )}
+                </div>
+            </div>
+
+            {/* 채팅창 */}
+            <div
+                style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection:
+                        "column",
+                }}
+            >
+                {/* 헤더 */}
+                <div
+                    style={{
+                        height: 70,
+                        background:
+                            "white",
+                        borderBottom:
+                            "1px solid #ddd",
+                        display: "flex",
+                        alignItems:
+                            "center",
+                        padding:
+                            "0 20px",
+                        fontSize: 20,
+                        fontWeight: 600,
+                    }}
+                >
+                    {roomname ||
+                        "채팅방"}
+                </div>
+
+                {/* 메시지 영역 */}
+                <div
+                    style={{
+                        flex: 1,
+                        overflowY:
+                            "auto",
+                        padding: 20,
+                    }}
+                >
+                    {messages.map(
+                        msg => {
+                            const mine =
+                                msg.username ===
+                                username;
+
+                            return (
+                                <div
+                                    key={
+                                        msg.message_id
+                                    }
+                                    style={{
+                                        display:
+                                            "flex",
+                                        justifyContent:
+                                            mine
+                                                ? "flex-end"
+                                                : "flex-start",
+                                        marginBottom: 12,
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            maxWidth:
+                                                "65%",
+                                        }}
+                                    >
+                                        {!mine && (
+                                            <div
+                                                style={{
+                                                    fontSize: 12,
+                                                    color: "#666",
+                                                    marginBottom: 4,
+                                                }}
+                                            >
+                                                {
+                                                    msg.username
+                                                }
+                                            </div>
+                                        )}
+
+                                        <div
+                                            style={{
+                                                background:
+                                                    mine
+                                                        ? "#FFE812"
+                                                        : "white",
+                                                borderRadius: 18,
+                                                padding:
+                                                    "10px 14px",
+                                                boxShadow:
+                                                    "0 1px 3px rgba(0,0,0,0.12)",
+                                                wordBreak:
+                                                    "break-word",
+                                            }}
+                                        >
+                                            {
+                                                msg.message
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    )}
+
+                    <div
+                        ref={
+                            bottomRef
+                        }
+                    />
+                </div>
+
+                {/* 입력창 */}
+                <div
+                    style={{
+                        background:
+                            "white",
+                        borderTop:
+                            "1px solid #ddd",
+                        padding: 16,
+                        display: "flex",
+                        gap: 12,
+                    }}
+                >
+                    <input
+                        value={message}
+                        onChange={e =>
+                            setMessage(
+                                e.target.value
+                            )
+                        }
+                        onKeyDown={e => {
+                            if (
+                                e.key ===
+                                "Enter"
+                            ) {
+                                sendMessage();
+                            }
+                        }}
+                        placeholder="메시지 입력..."
+                        style={{
+                            flex: 1,
+                            padding:
+                                "12px",
+                            border:
+                                "1px solid #ccc",
+                            borderRadius: 8,
+                        }}
+                    />
+
+                    <button
+                        onClick={
+                            sendMessage
+                        }
+                    >
+                        전송
+                    </button>
+                </div>
             </div>
         </div>
     );

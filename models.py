@@ -8,7 +8,7 @@ class User(db.Model):
 
 
 class Room(db.Model):
-    room_id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.String(20), primary_key=True)
     roomname = db.Column(db.String(20), unique=True, nullable=False) # 근데 이거 좀 비효율적인데 roomid가 roomname이잖아 괜히 헷갈릴 거 같은데
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -24,7 +24,7 @@ class Room(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey("room.room_id"), nullable=False)
+    room_id = db.Column(db.String(20), db.ForeignKey("room.room_id"), nullable=False) # 아니 roomid 겁나 헷갈리네 빨리 바꿔야지
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
 
     content = db.Column(db.Text, nullable=False)

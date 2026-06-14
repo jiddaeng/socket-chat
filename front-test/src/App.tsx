@@ -92,7 +92,7 @@ export default function App() {
 
     function joinRoom() {
         socketRef.current?.emit(
-            "join_room",
+            "join_chat_room",
             {
                 roomid: roomname,
             }

@@ -4,8 +4,11 @@ from state import sidToUserid, useridToRoomid
 from flask_socketio import emit
 from models import Message, User
 
+print("message.py import됨")
+
 @socketio.on("send_message")
 def handle_send_message(data) :
+    print("send_message 호출됨")
     userid = sidToUserid.get(request.sid)
     if userid is None :
         emit("message_error", "message: userid is None")
@@ -37,7 +40,7 @@ def handle_send_message(data) :
 
     emit("message_success", 
         {
-            "message_id": message.message_id, 
+            "message_id": message.id, 
             "message":content, 
             "userid":userid, 
             "username":user.username

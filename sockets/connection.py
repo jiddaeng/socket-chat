@@ -6,6 +6,8 @@ from state import sidToUserid, useridToRoomid, rooms
 from extensions import db
 from models import Room
 
+print("connection.py import됨")
+
 @socketio.on("connect")
 def handle_connect(auth) :
     print("connect 호출됨")

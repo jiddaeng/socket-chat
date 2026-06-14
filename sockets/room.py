@@ -5,6 +5,8 @@ from extensions import db
 from models import User, Room
 from state import rooms, sidToUserid, useridToRoomid
 
+print("room.py import됨")
+
 @socketio.on("create_room")
 def handle_create_room(data) :
     print("create_room 호출됨")
@@ -39,7 +41,9 @@ def handle_create_room(data) :
             userid: username
         }
     }
-    
+    db.session.add(Room(room_id=roomid, roomname=roomname))
+    db.session.commit()
+        
     useridToRoomid[userid] = roomid
     join_room(roomid)
 
@@ -51,8 +55,8 @@ def handle_create_room(data) :
     # 안윤호 바보
     
 
-@socketio.on("join_room")
-def handle_join_room(data) :
+@socketio.on("join_chat_room")
+def handle_join_chat_room(data) :
     print("join_room 호출됨")
     userid = sidToUserid.get(request.sid)
     if userid is None :
@@ -78,6 +82,4 @@ def handle_join_room(data) :
     username = user.username
     room["userids"][userid] = username
     join_room(roomid)
-    db.session.add(Room, roomname=roomid)
-    db.session.commit()
     emit("join_room_success", {"roomname":roomid})

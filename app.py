@@ -6,7 +6,7 @@ from flask_cors import CORS
 from extensions import db, jwt, socketio
 
 from routes.auth import auth_bp
-from sockets import connection, room
+from sockets import connection, room # noqa: F401
 
 
 def create_app():

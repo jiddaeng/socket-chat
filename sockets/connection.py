@@ -3,6 +3,8 @@ from extensions import socketio
 from flask_jwt_extended import decode_token
 from flask_socketio import emit, leave_room
 from state import sidToUserid, useridToRoomid, rooms
+from extensions import db
+from models import Room
 
 @socketio.on("connect")
 def handle_connect(auth) :
@@ -39,4 +41,6 @@ def handle_disconnect() :
 
         if len(rooms[roomid]["userids"]) == 0 :
             del rooms[roomid]
- 
+            Room.query.filter_by(roomname=roomid).delete()
+            db.session.commit()
+            

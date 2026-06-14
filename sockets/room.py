@@ -2,7 +2,7 @@ from flask import request
 from extensions import socketio
 from flask_socketio import emit, join_room
 from extensions import db
-from models import User
+from models import User, Room
 from state import rooms, sidToUserid, useridToRoomid
 
 @socketio.on("create_room")
@@ -78,4 +78,6 @@ def handle_join_room(data) :
     username = user.username
     room["userids"][userid] = username
     join_room(roomid)
+    db.session.add(Room, roomname=roomid)
+    db.session.commit()
     emit("join_room_success", {"roomname":roomid})

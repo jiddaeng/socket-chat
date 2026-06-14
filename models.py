@@ -25,7 +25,7 @@ class Room(db.Model):
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     room_id = db.Column(db.Integer, db.ForeignKey("room.room_id"), nullable=False)
-    user_id = db.Column(db.Integer, db.foreignKey("user.user_id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
 
     content = db.Column(db.Text, nullable=False)
 
